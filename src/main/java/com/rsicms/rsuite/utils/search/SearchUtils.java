@@ -48,10 +48,14 @@ public class SearchUtils {
 	 */
 	public final static String XPATH_ANY_ELEMENT = "/element()";
 
+	public final static QName QNAME_NON_XML_MO = new QName("http://www.rsuitecms.com/rsuite/ns/metadata", "nonxml",
+			"r");
+
 	/**
 	 * XPath expression for any non-XML MO.
 	 */
-	public final static String XPATH_ANY_NON_XML_MO = "/r:nonxml";
+	public final static String XPATH_ANY_NON_XML_MO = "/".concat(QNAME_NON_XML_MO.getPrefix()).concat(":")
+			.concat(QNAME_NON_XML_MO.getLocalPart());
 
 	/**
 	 * Materialized view markup for system metadata, leading up to the metadata
@@ -359,8 +363,8 @@ public class SearchUtils {
 	 *            Optional CA type to restrict results to.
 	 * @param lmdName
 	 *            Optional LMD name to work into the search criteria
-	 * @param lmdValue
-	 *            Optional LMD value to work into the search criteria
+	 * @param lmdValues
+	 *            Optional LMD values to work into the search criteria
 	 * @param excludeId
 	 *            Optional CA ID to exclude from search
 	 * @param maxResultCount
