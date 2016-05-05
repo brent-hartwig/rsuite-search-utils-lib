@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+apply from: 'http://ivy.reallysi.com/ivy-repo/rsuite-community/repositories.gradle'
+apply from: 'http://ivy.reallysi.com/ivy-repo/rsuite-community/std-plugin-tasks.gradle'
+
+group = "rsuite-community"
+project.buildDir = 'target'
+
+configurations {
+	includeInJar {
+		transitive = false
+	}
+}
+
+dependencies {
+	compile ('rsi:rsuite-api:5.0.0') {
+		transitive=false
+	}
+	compile ('rsuite-community:rsuite-message-props-lib:0.0.1') {
+		transitive=false
+	}
+	compile ('apache:commons-lang:3.3.1') {
+		transitive=false
+	}
+	compile ('apache:commons-logging:1.1.1') {
+		transitive=false
+	}
+	
+	configurations.compile.extendsFrom(configurations.includeInJar)
+}
+
+jar () {
+	baseName='rsuite-search-utils-lib'
+	from configurations.includeInJar
+}
