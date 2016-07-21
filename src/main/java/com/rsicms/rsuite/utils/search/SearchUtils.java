@@ -25,7 +25,8 @@ import com.reallysi.rsuite.service.SearchService;
  * <p>
  * In July 2016, started adding instance methods that wrap static methods. These are present to
  * facilitate unit testing. Those methods have names matching that of their static counterparts, but
- * begin with a lower case "i" for "instance".
+ * begin with a lower case "i" for "instance". Instance methods also do not require a search service
+ * parameter, as that is expected in the constructor.
  * <p>
  * This class should be extended as necessary.
  * <p>
@@ -85,6 +86,26 @@ public class SearchUtils {
     public String getLocalname() {
       return localname;
     }
+  }
+
+  /**
+   * The search service instance this class's instance methods are to use.
+   */
+  private SearchService searchService;
+
+  /**
+   * Private no-arg constructor
+   */
+  private SearchUtils() {}
+
+  /**
+   * Encourage instance method users to provide an instance of search service.
+   * 
+   * @param searchService
+   */
+  public SearchUtils(SearchService searchService) {
+    this();
+    this.searchService = searchService;
   }
 
   /**
@@ -260,7 +281,6 @@ public class SearchUtils {
    * facilitating unit testing.
    * 
    * @param user
-   * @param searchService
    * @param qname The qualified name of the objects to find.
    * @param allowDescendants Submit true if qualifying objects may not be top-level MOs (slower
    *        search). Submit false if qualifying objects may only be top-level MOs (faster search).
@@ -271,8 +291,8 @@ public class SearchUtils {
    * @return list of qualifying MOs.
    * @throws RSuiteException
    */
-  public List<ManagedObject> iSearchForManagedObjects(User user, SearchService searchService,
-      QName qname, boolean allowDescendants, List<NameValuesPair> lmdCriteria, int maxResultCount)
+  public List<ManagedObject> iSearchForManagedObjects(User user, QName qname,
+      boolean allowDescendants, List<NameValuesPair> lmdCriteria, int maxResultCount)
       throws RSuiteException {
     return searchForManagedObjects(user, searchService, qname, allowDescendants, lmdCriteria,
         maxResultCount);
@@ -471,7 +491,6 @@ public class SearchUtils {
    * SearchService#constructSearch() should be used.
    * 
    * @param user
-   * @param searchService
    * @param caType Required
    * @param lmdName Optional. Name of LMD to incorporate as search criteria.
    * @param lmdValue Optional. Value of LMD to incorporate as search criteria.
@@ -482,8 +501,8 @@ public class SearchUtils {
    * @throws RSuiteException Throw if a parameter value is invalid, or RSuite encounters an
    *         exception with the search.
    */
-  public List<String> iSearchForContentAssemblyIds(User user, SearchService searchService,
-      String caType, String lmdName, String lmdValue, int maxResultCount) throws RSuiteException {
+  public List<String> iSearchForContentAssemblyIds(User user, String caType, String lmdName,
+      String lmdValue, int maxResultCount) throws RSuiteException {
     return searchForContentAssemblyIds(user, searchService, caType, lmdName, lmdValue,
         maxResultCount);
   }
