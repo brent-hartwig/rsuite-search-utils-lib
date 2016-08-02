@@ -9,8 +9,8 @@ import com.rsicms.rsuite.utils.messsageProps.LibraryMessageProperties;
  */
 public class SearchUtilsMessageProperties extends LibraryMessageProperties {
 
-	public SearchUtilsMessageProperties() throws IOException {
-		super(SearchUtilsMessageProperties.class);
-	}
+  public SearchUtilsMessageProperties() throws IOException {
+    super(SearchUtilsMessageProperties.class);
+  }
 
 }
