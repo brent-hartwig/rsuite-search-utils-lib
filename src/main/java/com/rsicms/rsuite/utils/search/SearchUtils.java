@@ -63,12 +63,18 @@ public class SearchUtils {
   /**
    * Materialized view markup for system metadata, leading up to the metadata name
    */
-  protected final static String MV_SMD_LEAD_OFF_EXPRESSION = "./mv:metadata/mv:system/mv:";
+  protected final static String MV_SMD_LEAD_OFF_EXPRESSION = "mv:metadata/mv:system/mv:";
 
   /**
    * Materialized view markup for layered metadata, leading up to the metadata name.
    */
-  protected final static String MV_LMD_LEAD_OFF_EXPRESSION = "./mv:metadata/mv-lmd:layered/mv-lmd:";
+  protected final static String MV_LMD_LEAD_OFF_EXPRESSION = "mv:metadata/mv-lmd:layered/mv-lmd:";
+
+  /**
+   * Materialized view markup for an alias, leading up to the alias type and text.
+   */
+  protected final static String MV_ALIAS_LEAD_OFF_EXPRESSION =
+      "mv:metadata/mv:aliases/mv:alias/mv:alias-";
 
   /**
    * RSuite system metadata info. Add to this as more is accessed.
@@ -150,6 +156,37 @@ public class SearchUtils {
   }
 
   /**
+   * Get a predicate for a single alias constraint.
+   * <p>
+   * Tests equality.
+   * 
+   * @param valuesAreTypes Submit true if the provided value(s) is an alias type. Submit false when
+   *        the value(s) is an alias name/text.
+   * @param values One or more values to test equality of.
+   * @return An alias XPath predicate
+   */
+  public static String getAliasXPathPredicate(boolean valuesAreTypes, String... values) {
+    return new StringBuilder("[").append(getAliasConstraint(valuesAreTypes, values)).append("]")
+        .toString();
+  }
+
+  /**
+   * Get an alias constraint
+   * <p>
+   * Caller responsible for placing this in a predicate (brackets).
+   * 
+   * @param valuesAreTypes Submit true if the provided value(s) is an alias type. Submit false when
+   *        the value(s) is an alias name/text.
+   * @param values One or more values to test equality of.
+   * @return An alias XPath constraint
+   */
+  public static String getAliasConstraint(boolean valuesAreTypes, String... values) {
+
+    return getMetadataConstraint(MV_ALIAS_LEAD_OFF_EXPRESSION, valuesAreTypes ? "type" : "text",
+        "=", values);
+  }
+
+  /**
    * Get a layered metadata constraint
    * <p>
    * Caller responsible for placing this in a predicate (brackets).
@@ -174,8 +211,8 @@ public class SearchUtils {
    */
   public static String getMetadataConstraint(String leadOffExpression, String name, String op,
       String... values) {
-    StringBuilder buf = new StringBuilder(leadOffExpression).append(name).append("/text() ")
-        .append(op).append(" (");
+    StringBuilder buf =
+        new StringBuilder(leadOffExpression).append(name).append(" ").append(op).append(" (");
 
     boolean first = true;
     for (String value : values) {
@@ -327,6 +364,41 @@ public class SearchUtils {
       for (NameValuesPair lmdPair : lmdCriteria) {
         query.append(getLayeredMetadataXPathPredicate(lmdPair.getName(), lmdPair.getValues()));
       }
+    }
+
+    return searchForObjects(user, searchService, query.toString(), maxResultCount);
+  }
+
+  /**
+   * Search for MOs by alias.
+   * <p>
+   * Given a list of MOs is returned, as opposed to an instance of <code>Search</code>, this is only
+   * intended to be used when a small number of matches are expected. Alternatives exist, but may
+   * not be implemented in this class.
+   * 
+   * @param user
+   * @param searchService
+   * @param qname The qualified name of the objects to find.
+   * @param allowDescendants Submit true if qualifying objects may not be top-level MOs (slower
+   *        search). Submit false if qualifying objects may only be top-level MOs (faster search).
+   * @param valuesAreTypes Submit true if the provided value(s) is an alias type. Submit false when
+   *        the value(s) is an alias name/text.
+   * @param aliasValues One or more alias values that align with the valuesAreTypes parameter value.
+   *        Optional. May send in null or an empty list to exclude this criteria.
+   * @param maxResultCount Indicate the maximum number of desired search results. For instance, if
+   *        you only expect one, pass in two. This is an efficient way to get the one result you
+   *        want, while also making sure there is only one. Send in 0 for all.
+   * @return list of qualifying MOs.
+   * @throws RSuiteException
+   */
+  public static List<ManagedObject> searchForManagedObjects(User user, SearchService searchService,
+      QName qname, boolean allowDescendants, boolean valuesAreTypes, List<String> aliasValues,
+      int maxResultCount) throws RSuiteException {
+    StringBuilder query = new StringBuilder(getXPathExpression(qname, allowDescendants));
+
+    if (aliasValues != null && aliasValues.size() > 0) {
+      query.append(getAliasXPathPredicate(valuesAreTypes,
+          aliasValues.toArray(new String[aliasValues.size()])));
     }
 
     return searchForObjects(user, searchService, query.toString(), maxResultCount);

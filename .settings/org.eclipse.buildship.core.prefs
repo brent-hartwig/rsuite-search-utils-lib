@@ -1,6 +1,5 @@
 connection.arguments=
 connection.gradle.distribution=GRADLE_DISTRIBUTION(VERSION(1.12))
-connection.gradle.user.home=null
 connection.java.home=null
 connection.jvm.arguments=
 connection.project.dir=
